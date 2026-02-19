@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
   volume: '50',
 };
 
+// 將秒數格式化為 mm:ss 顯示字串。
 function formatClock(seconds) {
   const safeSeconds = Math.max(0, Number(seconds) || 0);
   const m = Math.floor(safeSeconds / 60);
@@ -26,6 +27,7 @@ function formatClock(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+// 從 localStorage 載入產量紀錄，若資料無效則回傳空陣列。
 function loadMilkRecordsFromStorage() {
   try {
     const raw = localStorage.getItem(MILK_RECORDS_STORAGE_KEY);
@@ -163,6 +165,7 @@ function App() {
   const hasStarted = isFinished || masterSequence.length > 0 || currentIdx > 0 || timeLeft > 0;
   const mainBtnLabel = isRunning ? '暫停' : hasStarted ? '繼續' : '開始計時';
 
+  // 延遲建立並快取 AudioContext，避免重複初始化。
   function getAudioContext() {
     if (!audioCtxRef.current) {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -172,6 +175,7 @@ function App() {
     return audioCtxRef.current;
   }
 
+  // 依音效類型播放指定秒數提示音，並嘗試觸發裝置震動。
   function playTone(type, duration) {
     const audioCtx = getAudioContext();
     if (!audioCtx) return;
@@ -214,6 +218,7 @@ function App() {
     }
   }
 
+  // 依照目前設定組出完整 A/B/C 階段執行序列（含 alarm 任務）。
   function buildSequence() {
     const rounds = Number.parseInt(settings.totalRounds, 10) || 1;
     const s1 = {
@@ -264,6 +269,7 @@ function App() {
     return list;
   }
 
+  // 將目前循環設定寫入 localStorage。
   function saveToStorage() {
     const data = {
       s1m: settings.s1Min,
@@ -279,6 +285,7 @@ function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
+  // 初始化一次新的計時流程，計算總時長、開始時間與 ETA。
   function init() {
     const sequence = buildSequence();
     if (!sequence.length) return false;
@@ -302,20 +309,24 @@ function App() {
     return true;
   }
 
+  // 開始計時（啟用 interval 流程）。
   function start() {
     setIsRunning(true);
   }
 
+  // 暫停計時（停止 interval 流程）。
   function pause() {
     setIsRunning(false);
   }
 
+  // 所有任務結束時收尾：暫停並顯示完成提示。
   function finish() {
     pause();
     setIsFinished(true);
     showModal('全部完成');
   }
 
+  // 將計時器與畫面狀態重設回初始值。
   function reset() {
     pause();
     hideModal();
@@ -329,6 +340,7 @@ function App() {
     setEtaLabel('--:--');
   }
 
+  // 主按鈕行為：在開始/暫停/繼續之間切換，必要時先初始化。
   function togglePlay() {
     if (isRunning) {
       pause();
@@ -348,22 +360,27 @@ function App() {
     start();
   }
 
+  // 顯示階段切換/完成提示 modal。
   function showModal(title) {
     setModal({ active: true, title });
   }
 
+  // 隱藏 modal 並還原預設標題。
   function hideModal() {
     setModal({ active: false, title: '階段切換' });
   }
 
+  // 更新循環設定欄位（通用 setter）。
   function handleInputChange(key, value) {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }
 
+  // 更新左乳/右乳輸入欄位。
   function handleMilkInputChange(side, value) {
     setMilkInput((prev) => ({ ...prev, [side]: value }));
   }
 
+  // 送出單次產量紀錄，附上送出時間並加入清單最前面。
   function submitMilkRecord(event) {
     event.preventDefault();
     const left = Number.parseFloat(milkInput.left) || 0;
@@ -381,6 +398,7 @@ function App() {
     setMilkInput({ left: '', right: '' });
   }
 
+  // 將目前產量紀錄匯出為 CSV 並觸發下載。
   function exportMilkRecordsCsv() {
     if (!milkRecords.length) return;
     const header = ['submitted_at', 'left_ml', 'right_ml', 'total_ml'];
