@@ -1,7 +1,7 @@
 {
   "name": "new_start",
   "version": "0.1.0",
-  "homepage": "https://henry6812.github.io/milk",
+  "homepage": "https://henry6812.github.io/zen-pumping",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
