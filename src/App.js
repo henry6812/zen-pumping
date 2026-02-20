@@ -398,6 +398,13 @@ function App() {
     setMilkInput({ left: '', right: '' });
   }
 
+  // 刪除單筆產量紀錄（含確認視窗）。
+  function handleDeleteMilkRecord(recordId) {
+    const confirmed = window.confirm('確定要刪除此筆產量紀錄嗎？');
+    if (!confirmed) return;
+    setMilkRecords((prev) => prev.filter((item) => item.id !== recordId));
+  }
+
   // 將目前產量紀錄匯出為 CSV 並觸發下載。
   function exportMilkRecordsCsv() {
     if (!milkRecords.length) return;
@@ -647,6 +654,14 @@ function App() {
             <ul className="milk-record-list">
               {milkRecords.map((item) => (
                 <li key={item.id} className="milk-record-item">
+                  <button
+                    type="button"
+                    className="milk-record-delete-btn"
+                    onClick={() => handleDeleteMilkRecord(item.id)}
+                    aria-label="刪除紀錄"
+                  >
+                    X
+                  </button>
                   <div className="milk-record-time">{item.submittedAt}</div>
                   <div className="milk-record-values">
                     <span>左乳: {item.left} ml</span>
