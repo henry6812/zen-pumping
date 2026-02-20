@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/zen-pumping/static/css/main.44c8604c.css",
-    "main.js": "/zen-pumping/static/js/main.e47e04b7.js",
-    "static/js/453.8bbb9230.chunk.js": "/zen-pumping/static/js/453.8bbb9230.chunk.js",
-    "index.html": "/zen-pumping/index.html",
-    "main.44c8604c.css.map": "/zen-pumping/static/css/main.44c8604c.css.map",
-    "main.e47e04b7.js.map": "/zen-pumping/static/js/main.e47e04b7.js.map",
-    "453.8bbb9230.chunk.js.map": "/zen-pumping/static/js/453.8bbb9230.chunk.js.map"
+    "main.css": "/milk/static/css/main.82da7045.css",
+    "main.js": "/milk/static/js/main.31e44377.js",
+    "static/js/453.8bbb9230.chunk.js": "/milk/static/js/453.8bbb9230.chunk.js",
+    "index.html": "/milk/index.html",
+    "main.82da7045.css.map": "/milk/static/css/main.82da7045.css.map",
+    "main.31e44377.js.map": "/milk/static/js/main.31e44377.js.map",
+    "453.8bbb9230.chunk.js.map": "/milk/static/js/453.8bbb9230.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.44c8604c.css",
-    "static/js/main.e47e04b7.js"
+    "static/css/main.82da7045.css",
+    "static/js/main.31e44377.js"
   ]
 }
