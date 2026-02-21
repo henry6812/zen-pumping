@@ -60,6 +60,9 @@ function App() {
   const masterSequenceRef = useRef(masterSequence);
   const currentIdxRef = useRef(currentIdx);
   const timeLeftRef = useRef(timeLeft);
+  const totalSecondsLeftRef = useRef(totalSecondsLeft);
+  const stageDeadlineRef = useRef(0);
+  const totalDeadlineRef = useRef(0);
   const playToneRef = useRef(() => {});
   const showModalRef = useRef(() => {});
   const hideModalRef = useRef(() => {});
@@ -76,6 +79,10 @@ function App() {
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
+
+  useEffect(() => {
+    totalSecondsLeftRef.current = totalSecondsLeft;
+  }, [totalSecondsLeft]);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -102,12 +109,23 @@ function App() {
   useEffect(() => {
     if (!isRunning) return undefined;
 
+    const now = Date.now();
+    stageDeadlineRef.current = now + timeLeftRef.current * 1000;
+    totalDeadlineRef.current = now + totalSecondsLeftRef.current * 1000;
+
     timerRef.current = setInterval(() => {
-      if (timeLeftRef.current > 0) {
-        setTimeLeft((prev) => Math.max(prev - 1, 0));
-        setTotalSecondsLeft((prev) => Math.max(prev - 1, 0));
-        return;
+      const tickNow = Date.now();
+      const stageLeft = Math.max(0, Math.ceil((stageDeadlineRef.current - tickNow) / 1000));
+      const totalLeft = Math.max(0, Math.ceil((totalDeadlineRef.current - tickNow) / 1000));
+
+      if (stageLeft !== timeLeftRef.current) {
+        setTimeLeft(stageLeft);
       }
+      if (totalLeft !== totalSecondsLeftRef.current) {
+        setTotalSecondsLeft(totalLeft);
+      }
+
+      if (stageLeft > 0) return;
 
       const nextIdx = currentIdxRef.current + 1;
       const sequence = masterSequenceRef.current;
@@ -115,7 +133,10 @@ function App() {
       if (nextIdx < sequence.length) {
         const nextTask = sequence[nextIdx];
         setCurrentIdx(nextIdx);
+        currentIdxRef.current = nextIdx;
         setTimeLeft(nextTask.sec);
+        timeLeftRef.current = nextTask.sec;
+        stageDeadlineRef.current = tickNow + nextTask.sec * 1000;
 
         if (nextTask.type === 'alarm') {
           playToneRef.current(nextTask.sound, nextTask.sec);
@@ -124,9 +145,13 @@ function App() {
           hideModalRef.current();
         }
       } else {
+        setTotalSecondsLeft(0);
+        totalSecondsLeftRef.current = 0;
+        stageDeadlineRef.current = 0;
+        totalDeadlineRef.current = 0;
         finishRef.current();
       }
-    }, 1000);
+    }, 250);
 
     return () => {
       clearInterval(timerRef.current);
@@ -295,11 +320,16 @@ function App() {
     hideModal();
     setMasterSequence(sequence);
     setCurrentIdx(0);
+    currentIdxRef.current = 0;
     setTimeLeft(sequence[0].sec);
+    timeLeftRef.current = sequence[0].sec;
 
     const total = sequence.reduce((acc, item) => acc + item.sec, 0);
     setTotalSeconds(total);
     setTotalSecondsLeft(total);
+    totalSecondsLeftRef.current = total;
+    stageDeadlineRef.current = 0;
+    totalDeadlineRef.current = 0;
 
     const now = new Date();
     setStartTimeLabel(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -333,9 +363,14 @@ function App() {
     setIsFinished(false);
     setMasterSequence([]);
     setCurrentIdx(0);
+    currentIdxRef.current = 0;
     setTimeLeft(0);
+    timeLeftRef.current = 0;
     setTotalSeconds(0);
     setTotalSecondsLeft(0);
+    totalSecondsLeftRef.current = 0;
+    stageDeadlineRef.current = 0;
+    totalDeadlineRef.current = 0;
     setStartTimeLabel('--:--');
     setEtaLabel('--:--');
   }
